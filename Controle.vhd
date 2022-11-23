@@ -5,7 +5,7 @@ ENTITY Controle IS
 PORT(
 	-- Entradas de controle
 	CLOCK: IN std_logic;
-	enter: IN std_logic;
+	enter: IN std_logic; --- (sw0)
 	reset: IN std_logic;
 	-- Entradas de status
 	end_FPGA, end_User, end_time, win, match: IN std_logic;
@@ -25,40 +25,60 @@ process(clock, reset)
     if (reset = '1') then
       EA <= Init;
     elsif (clock'event AND clock = '1') then 
-        EAtual <= PEstado;
+        EA <= PE;
     end if;
   end process;
 
 --- agora é a lógica para determinar o proximo estado
 
-process(EAtual)   --- Logica a definir
+process(EA, end_FPGA, end_User, end_time, win, match)   --- entradas de status para transições 
   begin
-    case EAtual is
-      when E1 =>
-         LED1 <= '1';
-         LED2 <= '1';
-         LED3<= '1';
-         PEstado <= E2;
+    case EA is
+      when Init =>
+         R1 <= '1';
+         R2 <= '1';
+         PE <= Setup;
          
         
-      when E2 =>
-         LED1 <= '0';
-         LED2 <= '1';
-         LED3<= '1';
-         PEstado <= E3;
+      when Setup =>
+        E1 <= '1';
+        if enter = '1' then
+            PE <= Play_FPGA;
+        end if;
          
       
-      when E3 =>
-         LED1 <= '0';
-         LED2 <= '0';
-         LED3<= '1';
-         PEstado <= E4;
+      when Play_FPGA =>
+        E3 <= '1';
+        if end_FPGA = '1' then
+            PE <= Play_User;
+        end if;
          
-      when E4 =>
-         LED1 <= '0';
-         LED2 <= '0';
-         LED3<= '0';
-         PEstado <= E1;
+         
+      when Play_User =>
+         E2 <= '1';
+         if end_time = '1' then
+            PE <= Result;
+         elsif end_User = '1' then
+            PE <= Check;
+         end if;
+         
+     
+     when Check =>
+        if match = '1' then
+            PE <= Next_Round;
+        else
+            PE <= Result;
+        end if;
+        
+     when Next_Round =>
+        if win = '1' then
+            PE <= Result;
+        else
+            PE <= Play_FPGA;
+        end if;
+    
+    
+    
     
     end case;
   end process;
