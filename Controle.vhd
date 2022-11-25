@@ -37,49 +37,99 @@ process(EA, end_FPGA, end_User, end_time, win, match)   --- entradas de status p
       when Init =>
          R1 <= '1';
          R2 <= '1';
+         E1 <= '0';
+         E2 <= '0';
+         E3 <= '0';
+         E4 <= '0';
+         SEL <= '0';
          PE <= Setup;
          
         
       when Setup =>
+        R1 <= '0';
+        R2 <= '0';
         E1 <= '1';
+        E2 <= '0';
+        E3 <= '0';
+        E4 <= '0';
+        SEL <= '0';
         if enter = '1' then
             PE <= Play_FPGA;
+        else
+          PE <= Setup;
         end if;
          
       
       when Play_FPGA =>
+        R1 <= '0';
+        R2 <= '0';
+        E1 <= '0';
+        E2 <= '0';
         E3 <= '1';
+        E4 <= '0';
+        SEL <= '0';
         if end_FPGA = '1' then
-            PE <= Play_User;
+          PE <= Play_User;
+        else
+          PE <= Play_FPGA;
         end if;
          
          
       when Play_User =>
+         R1 <= '0';
+         R2 <= '0';
+         E1 <= '0';
          E2 <= '1';
+         E3 <= '0';
+         E4 <= '0';
+         SEL <= '0';
+         
          if end_time = '1' then
             PE <= Result;
-         elsif end_User = '1' then
+         elsif end_User = '1' and end_time = '0' then
             PE <= Check;
+         else
+            PE <= Play_User;         
          end if;
          
      
      when Check =>
-        if match = '1' then
+         R1 <= '0';
+         R2 <= '0';
+         E1 <= '0';
+         E2 <= '0';
+         E3 <= '0';
+         E4 <= '1';
+         SEL <= '0';
+         if match = '1' then
             PE <= Next_Round;
-        else
+         else
             PE <= Result;
-        end if;
+         end if;
         
      when Next_Round =>
+        R1 <= '0';
+        R2 <= '1';
+        E1 <= '0';
+        E2 <= '0';
+        E3 <= '0';
+        E4 <= '0';
+        SEL <= '0';
         if win = '1' then
             PE <= Result;
         else
             PE <= Play_FPGA;
         end if;
-    
-    
-    
-    
+
+     when Result =>
+        R1 <= '0';
+        R2 <= '0';
+        E1 <= '0';
+        E2 <= '0';
+        E3 <= '0';
+        E4 <= '0';
+        SEL <= '1';               
+       
     end case;
   end process;
 END arc;
