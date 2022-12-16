@@ -6,12 +6,12 @@ USE IEEE.std_logic_unsigned.all;
 ENTITY Topo IS
 PORT(
 	-- Entradas
-	CLOCK_50: IN std_logic; -- Ativar para FPGA
-	--CLK_500Hz: IN std_logic; --Ativar para o Emulador
+	--CLOCK_50: IN std_logic; -- Ativar para FPGA
+	CLK_500Hz: IN std_logic; --Ativar para o Emulador
 	KEY: IN std_logic_vector(3 DOWNTO 0);
 	SW: IN std_logic_vector(9 DOWNTO 0);
 	-- Saí­das
-	LEDR: OUT std_logic_vector(4 DOWNTO 0);
+	LEDR: OUT std_logic_vector(17 DOWNTO 0);
 	LEDG: OUT std_logic_vector(3 DOWNTO 0);
 	HEX0: OUT std_logic_vector(6 DOWNTO 0);
 	HEX1: OUT std_logic_vector(6 DOWNTO 0);
@@ -71,18 +71,64 @@ END COMPONENT;
 	SIGNAL win: std_logic;
 	SIGNAL match: std_logic;
 	SIGNAL SEL: std_logic;
-
+    SIGNAL ledUser: std_logic_vector(3 DOWNTO 0);
 
 
 BEGIN
-	--clock <= CLK_500Hz; --emulador
-	clock <= CLOCK_50; --FPGA
+	clock <= CLK_500Hz; --emulador
+	--clock <= CLOCK_50; --FPGA
 	LEDR(4) <= win;
+    ledr(17 DOWNTO 14) <= ledUser;  --emulador
+	--ledg <= ledUser; -- FPGA
 	
 	HEX6 <= "1111111"; --desliga o hex 6
 	HEX7 <= "1111111"; --desliga o hex 7
 	
-	
--- A fazer o resto pel@ alun@
+instanciacao_dataph: Datapath port map(CLOCK => clock,
+                                       KEY => KEY,
+                                       SWITCH => SW(9 downto 2),
+                                       SEL => SEL, 
+                                       R1 => R1,
+                                       R2 => R2,
+                                       E1 => E1,
+                                       E2 => E2,
+                                       E3 => E3,
+                                       E4 => E4,
+                                       leds => LEDR(3 downto 0),
+                                       ledg => ledUser,
+                                       hex0 => HEX0,
+                                       hex1 => HEX1,
+                                       hex2 => HEX2,
+                                       hex3 => HEX3,
+                                       hex4 => HEX4,
+                                       hex5 => HEX5,
+                                       end_FPGA => end_FPGA,
+                                       end_User => end_User,
+                                       end_time => end_time,
+                                       win => win,
+                                       match => match);
+                                       
+                                       
+
+
+
+instanciacao_controle: Controle port map(CLOCK => clock,
+                                         enter => SW(0),
+                                         reset => SW(1),
+                                         R1 => R1,
+                                         R2 => R2,
+                                         E1 => E1,
+                                         E2 => E2,
+                                         E3 => E3,
+                                         E4 => E4,
+                                         SEL => SEL,
+                                         end_FPGA => end_FPGA,
+                                         end_User => end_User,
+                                         end_time => end_time,
+                                         win => win,
+                                         match => match );
+
+
+
 
 END ARCHITECTURE;
